@@ -45,16 +45,12 @@ func retrieveInvocationEvent() throws -> (String, Data) {
 }
 
 func invoke<Event: Decodable, Response: Encodable>(handler: @escaping (Event) -> Response, with event: Data) -> Result<Data, Error> {
-    let jsonDecoder = JSONDecoder()
-    guard let event = try? jsonDecoder.decode(Event.self, from: event) else {
-        return .failure(SwiftOnLambdaError.invalidData)
+    guard let event = try? JSONDecoder().decode(Event.self, from: event) else {
+        return .failure(SwiftOnLambdaError.unableToDecodeEvent)
     }
-    
     let result = handler(event)
-    
-    let jsonEncoder = JSONEncoder()
-    guard let response = try? jsonEncoder.encode(result) else {
-        return .failure(SwiftOnLambdaError.invalidData)
+    guard let response = try? JSONEncoder().encode(result) else {
+        return .failure(SwiftOnLambdaError.unableToEncodeResponse)
     }
     return .success(response)
 }

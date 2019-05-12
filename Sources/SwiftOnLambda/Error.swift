@@ -1,8 +1,9 @@
 enum SwiftOnLambdaError: Error {
-    case invalidData
     case missingValue
     case noData
     case noResponse
+    case unableToDecodeEvent
+    case unableToEncodeResponse
     case unassignedResult
 }
 
