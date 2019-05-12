@@ -33,7 +33,7 @@ private func invokeAPI(url: String, method: String = "GET", body: Data? = nil) -
 }
 
 
-func retrieveInvokeEvent() throws -> (String, Data) {
+func retrieveInvocationEvent() throws -> (String, Data) {
     let INVOKE_NEXT = "http://\(AWS_LAMBDA_RUNTIME_API)/2018-06-01/runtime/invocation/next"
     switch invokeAPI(url: INVOKE_NEXT) {
     case .success((let response, let data)):
@@ -44,7 +44,7 @@ func retrieveInvokeEvent() throws -> (String, Data) {
     }
 }
 
-func invoke<Event: Decodable, Response: Encodable>(event: Data, handler: @escaping (Event) -> Response) -> Result<Data, Error> {
+func invoke<Event: Decodable, Response: Encodable>(handler: @escaping (Event) -> Response, with event: Data) -> Result<Data, Error> {
     let jsonDecoder = JSONDecoder()
     guard let event = try? jsonDecoder.decode(Event.self, from: event) else {
         return .failure(SwiftOnLambdaError.invalidData)
@@ -59,7 +59,7 @@ func invoke<Event: Decodable, Response: Encodable>(event: Data, handler: @escapi
     return .success(response)
 }
 
-func postInvocationResponse(requestId:String, response: Data) throws {
+func postInvocationResponse(on requestId:String, with response: Data) throws {
     let INVOKE_POST_RESPONSE = "http://\(AWS_LAMBDA_RUNTIME_API)/2018-06-01/runtime/invocation/\(requestId)/response"
     switch invokeAPI(url: INVOKE_POST_RESPONSE, method: "POST", body: response) {
     case .success((let response, let data)):
@@ -69,7 +69,7 @@ func postInvocationResponse(requestId:String, response: Data) throws {
     }
 }
 
-func postInvocationError(requestId:String, error: Error) throws {
+func postInvocationError(on requestId:String, with error: Error) throws {
     let jsonEncoder = JSONEncoder()
     let error = try! jsonEncoder.encode(InvocationError(errorMessage: String(describing: error)))
     let INVOKE_POST_ERROR = "http://\(AWS_LAMBDA_RUNTIME_API)/2018-06-01/runtime/invocation/\(requestId)/error"

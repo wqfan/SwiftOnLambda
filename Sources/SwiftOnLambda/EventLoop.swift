@@ -1,12 +1,12 @@
-public func startEventLoop<Event: Decodable, Response: Encodable>(handler: @escaping (Event) -> Response) throws {
+public func startEventLoop<Event: Decodable, Response: Encodable>(on handler: @escaping (Event) -> Response) throws {
     while true {
-        let (requestId, event) = try retrieveInvokeEvent()
-        let result = invoke(event: event, handler: handler)
+        let (requestId, event) = try retrieveInvocationEvent()
+        let result = invoke(handler: handler, with: event)
         switch(result) {
         case .success(let response):
-            try postInvocationResponse(requestId: requestId, response: response)
+            try postInvocationResponse(on: requestId, with: response)
         case .failure(let error):
-            try postInvocationError(requestId: requestId, error: error)
+            try postInvocationError(on: requestId, with: error)
         }
     }
 }
